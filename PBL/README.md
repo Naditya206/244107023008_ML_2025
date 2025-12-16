@@ -1,42 +1,53 @@
-# Image-Based Fake Mobile Banking Receipt Detection 🔎
+# Laporan PBL Machine Learning
 
-A case study to detect whether a mobile banking receipt image is genuine or fake.
-For this case study, we chose a receipt format from **Bank Nasional Indonesia (BNI)**, specifically **Wondr**: https://wondr.bni.co.id/.
+**Overview:**
+- ML model : Logistic regression
+- Studi kasus : deteksi struk palsu bank BNI
+- Peran ML : klasifikasi karakter dari proses OCR
 
-This project is actually part of our main mobile app, **Rukunin**, a mobile tool designed to help residents and local leaders manage administration, finances, events, and day-to-day neighborhood tasks.
+---
 
-You can find our main project, Rukunin, here:
+## Alur kerja Machine Learning
 
-👉🏻 https://github.com/Squadron-team/Rukunin-App
-
-## Development
-
-This detection project focuses on several types of receipt inconsistencies, such as:
-1. A different total amount than expected
-2. Incorrect or modified fields in the receipt
-3. Changes in the overall receipt layout
-
-For image processing, we experimented with:
-- Object segmentation
-- Optical Character Recognition (OCR)
-- Layout matching
+1. [Pengumpulan data](#1-pengumpulan-data)
+2. [Data preprocessing & ekstraksi fitur](#2-data-preprocessing--ekstraksi-fitur)
+3. [Pembagian data (data splitting)](#3-pembagian-data-data-splitting)
+4. [Pemodelan klasifikasi](#3-pembagian-data-data-splitting)
+5. [Evaluasi model](#5-evaluasi-model)
+6. [Pengujian dan integrasi dengan sistem utama](#6-pengujian-dan-integrasi-dengan-sistem-utama)
 
 
-For machine learning, we tested several classical ML algorithms:
-- Support Vector Machine (SVM)
-- k-Nearest Neighbor (KNN)
-- Logistic Regression
+### 1. Pengumpulan data
 
-## Deployment
+Data yang dikumpulkan berasal dari beberapa gambar struk Bank BNI. Data ini mencakup gambar struk transfer yang dilakukan dengan menggunakan Bank BNI. Total terdapat kurang lebih gambar dengan sejumlah 70 gambar. 
 
-In this case study, we also experimented with deploying both the model and image-processing pipeline directly to the target device.
-Since our main app runs on mobile and the computation is not too heavy, running everything **fully on-device** is the best approach for both performance and privacy.
+Dari beberapa gambar yang diperoleh, proses selanjutnya adalah pengambilan gambar yang mengandung karakter alfanumerik dan juga beberapa simbol. Proses ini akan dilakukan dengan melakukan proses croping pada gambar yang ada sehingga output akhirnya berupa beberapa gambar kecil yang mencakup karakter alfa numerik dan simbol.
 
-Our mobile app is built with the Flutter framework. We deployed the model using [ONNX](https://onnx.ai/), and we implemented communication between Dart and Android Kotlin using FFI and platform channels to perform the computer vision tasks natively.
+### 2. Data preprocessing & ekstraksi fitur
 
-## Future Direction
+Data preprocessing dilakukan agar data input konsisten dan memudahkan proses pemodelan pada model machine learning. Proses ini terdiri dari beberapa tahap yang mencakup:
+- Konversi gambar ke grayscale
+- Penentuan threshold
+- Menentukan bounding box
+- Melakukan proses resizing untuk konsistensi ukuran
+- Menambahkan padding pada gambar yang ramping
+- Mengubah data gambar menjadi flattened (1D array)
 
-We plan to expand this case study by improving robustness across more receipt formats, adding more advanced image-processing techniques, and evaluating real-world performance on different mobile devices.
-We also aim to refine the model so it can generalize better, reduce false positives, and integrate seamlessly into the Rukunin app’s workflow.
+Proses tersebut membuat gambar yang semula memiliki format RGB bisa diolah dengan mudah oleh model machine learning. Bentuk akhir dari tahapan ini adalah gambar berubah menjadi sebuah vektor dengan 1D array. Data tersebut akan menjadi fitur dari gambar yang mana fitur ini menyimpan data untuk tiap-tiap pixel gambar. Hal itu juga sekalian menjadi proses dari ekstraksi fitur yang merubah data gambar berdimensi tinggi menjadi flat.
 
-This repository will continue to grow as we explore more techniques and strengthen our approach to on-device computer vision.
+### 3. Pembagian data (data splitting)
+
+Data yang sudah disiapkan akan dibagi menjadi data training dan evaluasi. Proporsi yang ditentukan adalah 80% akan digunakan sebagai data training dan sisanya menjadi data evaluasi. 
+
+### 4. Pemodelan klasifikasi
+
+Pemodelan dilakukan dengan menggunakan model Logistic regression yang sangat ideal dengan kondisi input data. Model logistic regression memungkinkan model memiliki pembobotan tersendiri pada tiap-tiap pixel yang telah di flattening. Tiap karakter memiliki porsi pixel yang berbeda-beda namun logistc regression mampu melakukan generalisasi data sehingga mampu melakukan klasifikasi dengan baik.
+
+### 5. Evaluasi model
+
+Evaluasi model dilakukan dengan melakukan perbandingan dan konsistensi antara data training dan testing. Hasilnya diperoleh model logistic regression mampu menghasilkan akurasi lebih dari 90%.
+
+### 6. Pengujian dan integrasi dengan sistem utama
+
+Integrasi dengan sistem utama adalah integrasi dengan sistem deteksi struk palsu. Pada sistem utama, hasil dari deteksi karakter yang ada akan digunakan sebagai bahan pemrosesan lanjutan untuk evaluasi apakah suatu gambar tersebut merupakan gambar/struk palsu atau bukan.
+
